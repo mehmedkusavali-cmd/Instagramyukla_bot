@@ -1,8 +1,10 @@
 import asyncio
 import html
 import logging
+import os
 import sys
 from pathlib import Path
+from aiohttp import web
 
 from aiogram import Bot, Dispatcher, F, BaseMiddleware
 from aiogram.client.default import DefaultBotProperties
@@ -339,6 +341,25 @@ async def handle_text_message(message: Message, bot: Bot):
 
 
 
+async def _start_health_server():
+    """Render Web Service uchun port ochish va healthcheck javobini qaytarish"""
+    port_str = os.getenv("PORT")
+    if not port_str:
+        return
+    try:
+        port = int(port_str)
+        app = web.Application()
+        app.router.add_get("/", lambda r: web.Response(text="Bot is running successfully!"))
+        app.router.add_get("/health", lambda r: web.Response(text="OK"))
+        runner = web.AppRunner(app)
+        await runner.setup()
+        site = web.TCPSite(runner, "0.0.0.0", port)
+        await site.start()
+        logger.info(f"Render uchun veb-server {port}-portda ishga tushirildi.")
+    except Exception as e:
+        logger.warning(f"Health serverni ishga tushirishda ogohlantirish: {e}")
+
+
 async def main():
     """Botni ishga tushirish funksiyasi"""
     if not BOT_TOKEN or "YOUR_BOT_TOKEN" in BOT_TOKEN or ":" not in BOT_TOKEN:
@@ -359,6 +380,9 @@ async def main():
     except Exception as e:
         print(f"\n❌ Bot tokenida xatolik: {e}\nIltimos, .env faylidagi tokenni tekshiring.\n")
         return
+
+    # Render Web Service uchun portni tinglash
+    await _start_health_server()
 
     logger.info("Bot muvaffaqiyatli ishga tushmoqda...")
     try:
