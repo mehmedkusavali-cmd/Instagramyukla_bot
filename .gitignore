@@ -1,0 +1,21 @@
+# Muhit o'zgaruvchilari va maxfiy kalitlar (Tokenlar GitHubga chiqib ketmasligi uchun)
+.env
+
+# Vaqtinchalik yuklab olingan videolar
+downloads/
+
+# Python kesh fayllari
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Instagram cookies
+cookies.txt
+
+# Log fayllari
+*.log
+
+# Virtual muhit (Virtual environment)
+venv/
+.venv/
+env/
